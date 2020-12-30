@@ -6,41 +6,45 @@ date_default_timezone_set('America/Los_Angeles');
 $SCOREBOARD_BASE_URL = 'http://scores.nbcsports.com/nba/scoreboard.asp?day=';
 $NBC_SPORTS_SCORES_BASE_URL = 'http://scores.nbcsports.com';
 
-// Use today's date.
-$date = date("Ymd");
-//$date = "20170324";
-
-$weekDay = date("N"); // 1 for Monday through 7 for Sunday
-$time = date("H");
-// Games schedule:
-// M-F  17:30 - 23:30
-// S-S  9:30 - 23:30
-$shouldScrape = false;
-if ($weekDay < 6) {
-	if ($time >= 5 && $time <= 23) {
-		$shouldScrape = true;
-	}
+if ($_GET['date']) {
+	$date = $_GET['date'];
+	$shouldScrape = true;
 } else {
-	if ($time >= 9 && $time <= 23) {
-		$shouldScrape = true;
+	// Use today's date.
+	$date = date("Ymd");
+	$weekDay = date("N"); // 1 for Monday through 7 for Sunday
+	$time = date("H");
+	// Games schedule:
+	// M-F  17:30 - 23:30
+	// S-S  9:30 - 23:30
+	$shouldScrape = false;
+	if ($weekDay < 6) {
+		if ($time >= 5 && $time <= 23) {
+			$shouldScrape = true;
+		}
+	} else {
+		if ($time >= 9 && $time <= 23) {
+			$shouldScrape = true;
+		}
 	}
 }
-
+echo "Date: {$date}\n";
 echo "Scraping: ";
 if ($shouldScrape) {
 	echo "ON";
 } else {
 	echo "OFF";
 }
+echo "\n";
 
 if ($shouldScrape) {
 	// Html with all games in it.
-	$scoreboardHtml = getHtmlFromUrl($SCOREBOARD_BASE_URL.$date);
+	$scoreboardHtml = getHtmlFromUrl($SCOREBOARD_BASE_URL . $date);
 
 	$boxscores = [];
 	$matchups = getGameMatchups($scoreboardHtml->find('a'));
-	foreach($matchups as $game) {
-		if ($game[2] != null) {
+	foreach ($matchups as $game) {
+		if (isset($game[2])) {
 			array_push($boxscores, getBoxscore(getHtmlFromUrl($game[2])));
 		}
 	}
@@ -50,20 +54,22 @@ if ($shouldScrape) {
 /*
 * Returns an HTML document from the given URL.
 */
-function getHtmlFromUrl($url) {
+function getHtmlFromUrl($url)
+{
 	return file_get_html($url);
 }
 
 /*
 * Finds and returns a 2d array containing two teams and a boxcores link for each game.
 */
-function getGameMatchups($links) {
+function getGameMatchups($links)
+{
 	$matchups = [];
 	$gameCount = 0;
 	$teamCount = 0;
-	foreach($links as $link) {
+	foreach ($links as $link) {
 		if ($link->innertext == "Box") {
-			$matchups[$gameCount - 1][2] = $GLOBALS['NBC_SPORTS_SCORES_BASE_URL'].substr($link->href, 0, 37);
+			$matchups[$gameCount - 1][2] = $GLOBALS['NBC_SPORTS_SCORES_BASE_URL'] . substr($link->href, 0, 37);
 		}
 		if (substr($link->href, 0, strlen("/nba/teamstats.asp")) === "/nba/teamstats.asp") {
 			$matchups[$gameCount][$teamCount] = $link->innertext;
@@ -75,16 +81,16 @@ function getGameMatchups($links) {
 		}
 	}
 	return $matchups;
-
 }
 
-function getBoxscore($html) {
+function getBoxscore($html)
+{
 	$htmlBoxscore = $html->find('div[id=shsBoxscore]', 0);
 	$tables = $htmlBoxscore->find('table[class=shsBorderTable]');
 	if (sizeof($tables) == 2) {
 		$htmlTeamABoxscore = $tables[0];
 		$htmlTeamBBoxscore = $tables[1];
-	}else if(sizeof($tables) == 3) {
+	} else if (sizeof($tables) == 3) {
 		$htmlTeamABoxscore = $tables[1];
 		$htmlTeamBBoxscore = $tables[2];
 	}
@@ -96,11 +102,12 @@ function getBoxscore($html) {
 }
 
 /**
-* Given an html div containg the box score of a single team, returns an array that
-* contains the team name as the first element, and a matrix representing the box
-* score as the second element.
-*/
-function parseHtmlBoxscore($htmlTeamBoxScore) {
+ * Given an html div containg the box score of a single team, returns an array that
+ * contains the team name as the first element, and a matrix representing the box
+ * score as the second element.
+ */
+function parseHtmlBoxscore($htmlTeamBoxScore)
+{
 	$teamName = $htmlTeamBoxScore->children(0)->children(0)->innertext;
 
 	// Matrix of a boxscore.
@@ -108,7 +115,7 @@ function parseHtmlBoxscore($htmlTeamBoxScore) {
 
 	// Add row of headers to matrix.
 	$box[0] = [];
-	foreach($htmlTeamBoxScore->find('tr[class=shsColTtlRow]', 0)->find('td') as
+	foreach ($htmlTeamBoxScore->find('tr[class=shsColTtlRow]', 0)->find('td') as
 		$headerElem) {
 		$headerText = $headerElem->innertext;
 		if ($headerText == "FGM-FGA") {
@@ -123,14 +130,14 @@ function parseHtmlBoxscore($htmlTeamBoxScore) {
 
 	// Add a rows with stats for each player.
 	$htmlPlayerRows = getPlayerRows($htmlTeamBoxScore);
-	foreach($htmlPlayerRows as $row) {
+	foreach ($htmlPlayerRows as $row) {
 		array_push($box, getPlayerArray($row));
 	}
 
 	// Add a row for team total stats.
 	$totalsRow = [];
 	$tr = $htmlTeamBoxScore->find('tr[class=shsColTtlRow]', 1);
-	foreach($tr->find('td') as
+	foreach ($tr->find('td') as
 		$totalElem) {
 		array_push($totalsRow, str_replace("<br>", "", $totalElem->innertext));
 	}
@@ -140,9 +147,10 @@ function parseHtmlBoxscore($htmlTeamBoxScore) {
 }
 
 /**
-* Returns an array of html rows, each containing stats of a player.
-*/
-function getPlayerRows($htmlTable) {
+ * Returns an array of html rows, each containing stats of a player.
+ */
+function getPlayerRows($htmlTable)
+{
 	$rowsCero = $htmlTable->find('tr[class=shsRow0Row]');
 	$rowsOne = $htmlTable->find('tr[class=shsRow1Row]');
 
@@ -150,10 +158,11 @@ function getPlayerRows($htmlTable) {
 }
 
 /**
-* Combines 2 arrays by weaving all elements.
-* E.g. given arr1 = [A, B, C] and arr2 = [D, E, F] returns [A, D, B, E, C, F].
-*/
-function entwine($arr1, $arr2) {
+ * Combines 2 arrays by weaving all elements.
+ * E.g. given arr1 = [A, B, C] and arr2 = [D, E, F] returns [A, D, B, E, C, F].
+ */
+function entwine($arr1, $arr2)
+{
 	$result = [];
 	$len1 = sizeof($arr1);
 	$len2 = sizeof($arr2);
@@ -182,11 +191,12 @@ function entwine($arr1, $arr2) {
 }
 
 /**
-* Returns an array containg player stats parsed from an HTML row.
-*/
-function getPlayerArray($htmlRow) {
+ * Returns an array containg player stats parsed from an HTML row.
+ */
+function getPlayerArray($htmlRow)
+{
 	$arr = [];
-	foreach($htmlRow->find('td') as $col) {
+	foreach ($htmlRow->find('td') as $col) {
 		if ($col->find('a', 0) != null) {
 			array_push($arr, $col->find('a', 0)->innertext);
 		} else {
@@ -196,19 +206,21 @@ function getPlayerArray($htmlRow) {
 	return $arr;
 }
 
-function printMatrix($matrix) {
+function printMatrix($matrix)
+{
 	foreach ($matrix as $row) {
 		foreach ($row as $col) {
-			echo $col." | ";
+			echo $col . " | ";
 		}
 		echo "<br>";
 	}
 }
 
-function saveBoxScoreJson($boxscores) {
+function saveBoxScoreJson($boxscores)
+{
 	$id = 0;
 	$gamesJson = [];
-	foreach($boxscores as $boxscore) {
+	foreach ($boxscores as $boxscore) {
 		$temp = [];
 
 		$visitorBox = $boxscore[0];
@@ -233,5 +245,3 @@ function saveBoxScoreJson($boxscores) {
 	fwrite($fp, json_encode($result));
 	fclose($fp);
 }
-
-?>
