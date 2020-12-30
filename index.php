@@ -6,7 +6,7 @@ date_default_timezone_set('America/Los_Angeles');
 $games = json_decode(file_get_contents("api/v1/games.json"), true);
 
 $ready = false;
-if (isset($_GET['gameID'])) {
+if (isset($_GET['gameID']) && is_numeric($_GET['gameID'])) {
 	$gameID = $_GET['gameID'];
 	$ready = true;
 }
@@ -27,11 +27,11 @@ if ($ready) {
 	$textToReddit = getRedditText($visitorShort, $visitorName, $visitorScore, $visitorBox, $homeShort, $homeName, $homeScore, $homeBox);
 
 	$dateToday = date("Ymd");
-	$firebaseGames = json_decode(file_get_contents("https://nba-app-ca681.firebaseio.com/nba/".$dateToday."/games.json"), true);
+	$firebaseGames = json_decode(file_get_contents("https://nba-app-ca681.firebaseio.com/nba/" . $dateToday . "/games.json"), true);
 
 	$nbaDate = "";
 	$nbaID = "";
-	foreach($firebaseGames as $firebaseGame) {
+	foreach ($firebaseGames as $firebaseGame) {
 		if ($firebaseGame["awayTeamKey"] == $visitorShort || $firebaseGame["homeTeamKey"] == $homeShort) {
 			$nbaDate = $firebaseGame["date"];
 			$nbaID = $firebaseGame["id"];
@@ -54,7 +54,8 @@ if ($ready) {
  * @param (DOM object)
  * @return (array)
 */
-function getBoxScore($teamData) {
+function getBoxScore($teamData)
+{
 	$teamArray = array();
 	$i = 0;
 	$rowCount = count($teamData->find('tr'));
@@ -89,90 +90,96 @@ function getBoxScore($teamData) {
  *
  * @param (array)
 */
-function printBoxScore($teamArray) {
+function printBoxScore($teamArray)
+{
 	$lenI = count($teamArray);
 	for ($i = 0; $i < $lenI; $i++) {
 		$lenJ = count($teamArray[$i]);
-		for ($j = 0; $j < $lenJ; $j++) { 
-			echo $teamArray[$i][$j]." | ";
+		for ($j = 0; $j < $lenJ; $j++) {
+			echo $teamArray[$i][$j] . " | ";
 		}
-		echo $i."<br>";
+		echo $i . "<br>";
 	}
 }
 
-function short($player) {
-	return substr($player, 0, 1).". ".strstr($player, " ");
+function short($player)
+{
+	return substr($player, 0, 1) . ". " . strstr($player, " ");
 }
 
-function noDash($date) {
+function noDash($date)
+{
 	return str_replace("-", "", $date);
 }
 
-function dash($date) {
-	return substr($date, 0, 4)."-".substr($date, 4, 2)."-".substr($date, 6, 2);
+function dash($date)
+{
+	return substr($date, 0, 4) . "-" . substr($date, 4, 2) . "-" . substr($date, 6, 2);
 }
 
-function printHTMLTable($name, $short, $boxscore) {
+function printHTMLTable($name, $short, $boxscore)
+{
 ?>
 	<div class="row">
-	<div class="col-md-10 col-md-offset-1">
-		<table class="table table-hover" style='text-align: center'>
-			<thead>
-				<tr style='font-weight: bold'>
-					<th style='text-align: left'><?php echo $name; ?></th>
-					<?php
-					$numCols = count($boxscore[0]);
-					for($i = 0; $i < $numCols; $i++) {
-						// Don't show Player and POS
-						if ($i >= 2) {
-							echo "<th>".$boxscore[0][$i]."</th>";
+		<div class="col-md-10 col-md-offset-1">
+			<table class="table table-hover" style='text-align: center'>
+				<thead>
+					<tr style='font-weight: bold'>
+						<th style='text-align: left'><?php echo $name; ?></th>
+						<?php
+						$numCols = count($boxscore[0]);
+						for ($i = 0; $i < $numCols; $i++) {
+							// Don't show Player and POS
+							if ($i >= 2) {
+								echo "<th>" . $boxscore[0][$i] . "</th>";
+							}
 						}
+						?>
+					</tr>
+				</thead>
+				<tbody>
+					<?php
+					$lenI = count($boxscore);
+					for ($i = 1; $i < $lenI; $i++) {
+						$lenJ = count($boxscore[$i]); ?>
+						<tr>
+							<?php
+							for ($j = 0; $j < $lenJ; $j++) {
+								// Don't show POS
+								if ($j != 1) {
+									if ($j == 0) {
+										echo "<td style='text-align: left'>" . $boxscore[$i][$j] . "</td>";
+									} else {
+										echo "<td>" . $boxscore[$i][$j] . "</td>";
+									}
+								} else {
+									// show if its a DNP - reason column
+									if (strlen($boxscore[$i][$j]) > 7) {
+										echo "<td colspan=13>" . $boxscore[$i][$j] . "</td>";
+									}
+								}
+							}
+							?>
+						</tr>
+					<?php
 					}
 					?>
-				</tr>
-			</thead>
-			<tbody>
-<?php
-	$lenI = count($boxscore);
-	for ($i = 1; $i < $lenI; $i++) {
-		$lenJ = count($boxscore[$i]); ?>
-				<tr>
-<?php
-		for ($j = 0; $j < $lenJ; $j++) {
-			// Don't show POS
-			if ($j != 1) {
-				if ($j == 0) {
-					echo "<td style='text-align: left'>".$boxscore[$i][$j]."</td>";
-				} else {
-					echo "<td>".$boxscore[$i][$j]."</td>";
-				}
-			} else {
-				// show if its a DNP - reason column
-				if (strlen($boxscore[$i][$j]) > 7) {
-					echo "<td colspan=13>".$boxscore[$i][$j]."</td>";
-				} 
-			}
-		}
-?>
-				</tr>
-<?php
-	}
-?>
-			</tbody>
-		</table>
-	</div>
+				</tbody>
+			</table>
+		</div>
 	</div>
 <?php
 }
 
-function getRedditText($awayShort, $awayName, $awayScore, $awayBox, $homeShort, $homeName, $homeScore, $homeBox) {
+function getRedditText($awayShort, $awayName, $awayScore, $awayBox, $homeShort, $homeName, $homeScore, $homeBox)
+{
 	$text = "
-**[](/".$awayShort.") ".$awayShort."**|";
-	
+**[](/" . $awayShort . ") " . $awayShort . "**|";
+
 	$numCols = count($awayBox[0]);
-	for($i = 0; $i < $numCols; $i++) {
+	for ($i = 0; $i < $numCols; $i++) {
 		if ($i >= 2) {
-			$text .= "**".$awayBox[0][$i]."**|";
+			$text .= "**" . $awayBox[0][$i] . "**|";
 		}
 	}
 
@@ -184,11 +191,11 @@ function getRedditText($awayShort, $awayName, $awayScore, $awayBox, $homeShort, 
 	$text .= getTableText($awayBox);
 
 	$text .= "
-**[](/".$homeShort.") ".$homeShort."**|";
+**[](/" . $homeShort . ") " . $homeShort . "**|";
 	$numCols = count($homeBox[0]);
-	for($i = 0; $i < $numCols; $i++) {
+	for ($i = 0; $i < $numCols; $i++) {
 		if ($i >= 2) {
-			$text .= "**".$homeBox[0][$i]."**|";
+			$text .= "**" . $homeBox[0][$i] . "**|";
 		}
 	}
 
@@ -204,10 +211,10 @@ function getRedditText($awayShort, $awayName, $awayScore, $awayBox, $homeShort, 
 |^[nbaboxscoregenerator.com](http://www.nbaboxscoregenerator.com) ^by ^/u/Obi-Wan_Ginobili|";
 
 	return $text;
-
 }
 
-function getTableText($box) {
+function getTableText($box)
+{
 	$text = "";
 	$lenI = count($box);
 	$numCols = count($box[0]);
@@ -215,7 +222,7 @@ function getTableText($box) {
 		$lenJ = count($box[$i]);
 		for ($j = 0; $j < $lenJ; $j++) {
 			if ($j != 1) {
-				$text .= $box[$i][$j]."|";
+				$text .= $box[$i][$j] . "|";
 			} else {
 				if (strlen($box[$i][$j]) > 7) {
 					//$text .= $box[$i][$j]."|";
@@ -232,7 +239,8 @@ function getTableText($box) {
 	return $text;
 }
 
-function getShortName($teamName) {
+function getShortName($teamName)
+{
 	switch ($teamName) {
 		case 'Boston':
 			return "BOS";
@@ -303,13 +311,14 @@ function getShortName($teamName) {
 
 <!DOCTYPE html>
 <html>
+
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>NBA Box Score Generator</title>
 
-	<link rel="shortcut icon" href="chalmers.ico"> 
+	<link rel="shortcut icon" href="chalmers.ico">
 
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">
 
@@ -322,66 +331,80 @@ function getShortName($teamName) {
 
 	<style type="text/css">
 		.mdi::before {
-		    font-size: 24px;
-		    line-height: 14px;
+			font-size: 24px;
+			line-height: 14px;
 		}
+
 		.btn .mdi::before {
-		    position: relative;
-		    top: 4px;
+			position: relative;
+			top: 4px;
 		}
+
 		.btn-xs .mdi::before {
-		    font-size: 18px;
-		    top: 3px;
+			font-size: 18px;
+			top: 3px;
 		}
+
 		.btn-sm .mdi::before {
-		    font-size: 18px;
-		    top: 3px;
+			font-size: 18px;
+			top: 3px;
 		}
+
 		.dropdown-menu .mdi {
-		    width: 18px;
+			width: 18px;
 		}
+
 		.dropdown-menu .mdi::before {
-		    position: relative;
-		    top: 4px;
-		    left: -8px;
+			position: relative;
+			top: 4px;
+			left: -8px;
 		}
+
 		.nav .mdi::before {
-		    position: relative;
-		    top: 4px;
+			position: relative;
+			top: 4px;
 		}
+
 		.navbar .navbar-toggle .mdi::before {
-		    position: relative;
-		    top: 4px;
-		    color: #FFF;
+			position: relative;
+			top: 4px;
+			color: #FFF;
 		}
+
 		.breadcrumb .mdi::before {
-		    position: relative;
-		    top: 4px;
+			position: relative;
+			top: 4px;
 		}
+
 		.breadcrumb a:hover {
-		    text-decoration: none;
+			text-decoration: none;
 		}
+
 		.breadcrumb a:hover span {
-		    text-decoration: underline;
+			text-decoration: underline;
 		}
+
 		.alert .mdi::before {
-		    position: relative;
-		    top: 4px;
-		    margin-right: 2px;
+			position: relative;
+			top: 4px;
+			margin-right: 2px;
 		}
+
 		.input-group-addon .mdi::before {
-		    position: relative;
-		    top: 3px;
+			position: relative;
+			top: 3px;
 		}
+
 		.navbar-brand .mdi::before {
-		    position: relative;
-		    top: 2px;
-		    margin-right: 2px;
+			position: relative;
+			top: 2px;
+			margin-right: 2px;
 		}
+
 		.list-group-item .mdi::before {
-		    position: relative;
-		    top: 3px;
-		    left: -3px
+			position: relative;
+			top: 3px;
+			left: -3px
 		}
 	</style>
 </head>
@@ -413,16 +436,16 @@ function getShortName($teamName) {
 					<div class="row" style="margin-top: 15px">
 						<div class="col-md-8">
 							<select name="gameID">
-							<?php
-							foreach($games['games'] as $game) {
-								$id = $game['id'];
-								$visitor = $game['visitor'];
-								$home = $game['home'];
-								$matchup = $visitor." @ ".$home;
+								<?php
+								foreach ($games['games'] as $game) {
+									$id = $game['id'];
+									$visitor = $game['visitor'];
+									$home = $game['home'];
+									$matchup = $visitor . " @ " . $home;
 
-								echo "<option value='".$id."'>".$matchup."</option>";
-							}
-							?>
+									echo "<option value='" . $id . "'>" . $matchup . "</option>";
+								}
+								?>
 							</select>
 							<!--<input type="hidden" name="date" value="<?php echo $date; ?>"></input>-->
 							<input type="submit" value="Go!" class="btn btn-primary">
@@ -434,57 +457,63 @@ function getShortName($teamName) {
 			</div>
 			<div class="col-md-6 col-md-offset-1">
 				<p>Made for <a href="http://reddit.com/r/nba">/r/NBA</a> by <a href="http://reddit.com/user/Obi-Wan_Ginobili">/u/Obi-Wan_Ginobili.</a>
-				<br>
-				Report any issues on <a href="https://github.com/jorgegil96/boxscoregenerator">Github <i class="mdi mdi-github-circle"></i></a> or send me a <a href="http://reddit.com/user/Obi-Wan_Ginobili">PM</a>.
+					<br>
+					Report any issues on <a href="https://github.com/jorgegil96/boxscoregenerator">Github <i class="mdi mdi-github-circle"></i></a> or send me a <a href="http://reddit.com/user/Obi-Wan_Ginobili">PM</a>.
 			</div>
 		</div> <!-- End row -->
 
 		<hr>
 
-<?php
-	if ($ready) {
+		<?php
+		if ($ready) {
 
-		// Print HTML box score tables
-		printHTMLTable($games['games'][$gameID]['visitor'], $games['games'][$gameID]['visitor'], $games['games'][$gameID]['visitor_boxscore']);
-		printHTMLTable($games['games'][$gameID]['home'], $games['games'][$gameID]['home'], $games['games'][$gameID]['home_boxscore']);
-?>
+			// Print HTML box score tables
+			printHTMLTable($games['games'][$gameID]['visitor'], $games['games'][$gameID]['visitor'], $games['games'][$gameID]['visitor_boxscore']);
+			printHTMLTable($games['games'][$gameID]['home'], $games['games'][$gameID]['home'], $games['games'][$gameID]['home_boxscore']);
+		?>
 
-		<div class="row">
-			<div class="col-md-10 col-md-offset-1">
-				<h2>Copy text below to Reddit</h2>
-				<p>Use Ctrl-A</p>
-				<textarea cols="130" rows="50"><?php echo $textToReddit; ?></textarea>
+			<div class="row">
+				<div class="col-md-10 col-md-offset-1">
+					<h2>Copy text below to Reddit</h2>
+					<p>Use Ctrl-A</p>
+					<textarea cols="130" rows="50"><?php echo $textToReddit; ?></textarea>
+				</div>
 			</div>
-		</div>
-<?php
-	} else {
-?>
-		<div class="row">
-			<div class="col-md-10 col-md-offset-1">
-				<!--<h3 style="text-align: center">Game hasn't started or values are invalid.</h3>-->
-				<h3 style="text-align: center">Select a game from the list and click Go!</h3>
-				<p style="text-align: center">Empty list means no games have started.</p>
-				<br><br>
-		
-				<a href="https://play.google.com/store/apps/details?id=com.gmail.jorgegilcavazos.ballislife">
-					<h4 style="text-align: center">Download Swish! An android app I made for /r/NBA</h4>
-					<img style="display: block; margin: auto;" width="200" src="play_button.png">
-				</a>
+		<?php
+		} else {
+		?>
+			<div class="row">
+				<div class="col-md-10 col-md-offset-1">
+					<!--<h3 style="text-align: center">Game hasn't started or values are invalid.</h3>-->
+					<h3 style="text-align: center">Select a game from the list and click Go!</h3>
+					<p style="text-align: center">Empty list means no games have started.</p>
+					<br><br>
+
+					<a href="https://play.google.com/store/apps/details?id=com.gmail.jorgegilcavazos.ballislife">
+						<h4 style="text-align: center">Download Swish! An android app I made for /r/NBA</h4>
+						<img style="display: block; margin: auto;" width="200" src="play_button.png">
+					</a>
+				</div>
 			</div>
-		</div>
-<?php
-	}
-?>
+		<?php
+		}
+		?>
 	</div>
 	<script>
-	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		(function(i, s, o, g, r, a, m) {
+			i['GoogleAnalyticsObject'] = r;
+			i[r] = i[r] || function() {
+				(i[r].q = i[r].q || []).push(arguments)
+			}, i[r].l = 1 * new Date();
+			a = s.createElement(o),
+				m = s.getElementsByTagName(o)[0];
+			a.async = 1;
+			a.src = g;
+			m.parentNode.insertBefore(a, m)
+		})(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
 
-	  ga('create', 'UA-75603173-1', 'auto');
-	  ga('send', 'pageview');
-
+		ga('create', 'UA-75603173-1', 'auto');
+		ga('send', 'pageview');
 	</script>
 </body>
 

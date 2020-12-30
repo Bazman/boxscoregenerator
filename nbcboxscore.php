@@ -6,7 +6,7 @@ date_default_timezone_set('America/Los_Angeles');
 $SCOREBOARD_BASE_URL = 'http://scores.nbcsports.com/nba/scoreboard.asp?day=';
 $NBC_SPORTS_SCORES_BASE_URL = 'http://scores.nbcsports.com';
 
-if ($_GET['date']) {
+if ($_GET['date'] && is_numeric($_GET['date'])) {
 	$date = $_GET['date'];
 	$shouldScrape = true;
 } else {
