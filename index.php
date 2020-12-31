@@ -208,7 +208,7 @@ function getRedditText($awayShort, $awayName, $awayScore, $awayBox, $homeShort, 
 	$text .= "
 ||
 |:-:|
-|^[boxscoregenerator.sportsdeck.com](https://boxscoregenerator.sportsdeck.com/) ^by ^/u/bazman1976 (original work by /u/Obi-Wan_Ginobili)|";
+|^[boxscoregenerator.sportsdeck.com](https://boxscoregenerator.sportsdeck.com/) ^by ^/u/bazman1976 ^(original work by /u/Obi-Wan_Ginobili)|";
 
 	return $text;
 }
@@ -456,7 +456,7 @@ function getShortName($teamName)
 
 			</div>
 			<div class="col-md-6 col-md-offset-1">
-				<p>Made for <a href="http://reddit.com/r/nba">/r/NBA</a> by <a href="https://www.reddit.com/user/bazman1976/">/u/bazman1976</a>(originally by <a href="http://reddit.com/user/Obi-Wan_Ginobili">/u/Obi-Wan_Ginobili).</a>
+				<p>Made for <a href="http://reddit.com/r/nba">/r/NBA</a> by <a href="https://www.reddit.com/user/bazman1976/">/u/bazman1976</a> (originally by <a href="http://reddit.com/user/Obi-Wan_Ginobili">/u/Obi-Wan_Ginobili</a>).
 					<br>
 					Report any issues on <a href="https://github.com/Bazman/boxscoregenerator">Github <i class="mdi mdi-github-circle"></i></a> or send me a <a href="https://www.reddit.com/user/bazman1976/">PM</a>.
 			</div>
