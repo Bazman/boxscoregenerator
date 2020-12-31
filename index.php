@@ -490,8 +490,10 @@ function getShortName($teamName)
 					<br><br>
 
 					<a href="https://play.google.com/store/apps/details?id=com.gmail.jorgegilcavazos.ballislife">
-						<h4 style="text-align: center">Download Swish! An android app I made for /r/NBA</h4>
-						<a href='https://play.google.com/store/apps/details?id=com.gmail.jorgegilcavazos.ballislife&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' /></a>
+						<div style="text-align: center">
+							<h4>Download Swish! An android app /u/Obi-Wan_Ginobili made for /r/NBA</h4>
+							<img style="width: 200px;" alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' />
+						</div>
 					</a>
 				</div>
 			</div>
