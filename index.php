@@ -25,19 +25,6 @@ if ($ready) {
 	$homeBox = $gameChosen['home_boxscore'];
 
 	$textToReddit = getRedditText($visitorShort, $visitorName, $visitorScore, $visitorBox, $homeShort, $homeName, $homeScore, $homeBox);
-
-	$dateToday = date("Ymd");
-	$firebaseGames = json_decode(file_get_contents("https://nba-app-ca681.firebaseio.com/nba/" . $dateToday . "/games.json"), true);
-
-	$nbaDate = "";
-	$nbaID = "";
-	foreach ($firebaseGames as $firebaseGame) {
-		if ($firebaseGame["awayTeamKey"] == $visitorShort || $firebaseGame["homeTeamKey"] == $homeShort) {
-			$nbaDate = $firebaseGame["date"];
-			$nbaID = $firebaseGame["id"];
-			break;
-		}
-	}
 }
 
 
