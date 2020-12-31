@@ -231,7 +231,7 @@ function getShortName($teamName)
 	switch ($teamName) {
 		case 'Boston':
 			return "BOS";
-		case 'Broolyn':
+		case 'Brooklyn':
 			return "BKN";
 		case 'New York':
 			return "NYK";
