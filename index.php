@@ -156,7 +156,7 @@ function printHTMLTable($name, $short, $boxscore)
 								echo "<td colspan=13>" . $boxscore[$i][1] . "</td>";
 							} else {
 								for ($j = 0; $j < $lenJ; $j++) {
-									$bi = $statIndex[$i];
+									$bi = $statIndex[$j];
 									if ($bi == 0) {
 										// Name
 										echo "<td style='text-align: left'>" . $boxscore[$i][$bi] . "</td>";
