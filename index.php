@@ -3,6 +3,23 @@
 include 'simple_html_dom.php';
 date_default_timezone_set('America/Los_Angeles');
 
+$statIndex = [
+	0, // Name
+	2, // Mins
+	14, // Pts
+	3,
+	4,
+	5,
+	6,
+	7,
+	8,
+	9,
+	10,
+	11,
+	12,
+	13,
+];
+
 $games = json_decode(file_get_contents("api/v1/games.json"), true);
 
 $ready = false;
@@ -106,6 +123,7 @@ function dash($date)
 
 function printHTMLTable($name, $short, $boxscore)
 {
+	global $statIndex;
 ?>
 	<div class="row">
 		<div class="col-md-10 col-md-offset-1">
@@ -114,11 +132,12 @@ function printHTMLTable($name, $short, $boxscore)
 					<tr style='font-weight: bold'>
 						<th style='text-align: left'><?php echo $name; ?></th>
 						<?php
-						$numCols = count($boxscore[0]);
+						$numCols = count($statIndex);
 						for ($i = 0; $i < $numCols; $i++) {
-							// Don't show Player and POS
-							if ($i >= 2) {
-								echo "<th>" . $boxscore[0][$i] . "</th>";
+							// Don't show Player
+							if ($i >= 1) {
+								$bi = $statIndex[$i];
+								echo "<th>" . $boxscore[0][$bi] . "</th>";
 							}
 						}
 						?>
@@ -128,21 +147,21 @@ function printHTMLTable($name, $short, $boxscore)
 					<?php
 					$lenI = count($boxscore);
 					for ($i = 1; $i < $lenI; $i++) {
-						$lenJ = count($boxscore[$i]); ?>
+						$lenJ = count($statIndex); ?>
 						<tr>
 							<?php
-							for ($j = 0; $j < $lenJ; $j++) {
-								// Don't show POS
-								if ($j != 1) {
-									if ($j == 0) {
-										echo "<td style='text-align: left'>" . $boxscore[$i][$j] . "</td>";
+							if (count($boxscore[$i]) == 2) {
+								echo "<td style='text-align: left'>" . $boxscore[$i][0] . "</td>";
+								// show if its a DNP - reason column
+								echo "<td colspan=13>" . $boxscore[$i][1] . "</td>";
+							} else {
+								for ($j = 0; $j < $lenJ; $j++) {
+									$bi = $statIndex[$i];
+									if ($bi == 0) {
+										// Name
+										echo "<td style='text-align: left'>" . $boxscore[$i][$bi] . "</td>";
 									} else {
-										echo "<td>" . $boxscore[$i][$j] . "</td>";
-									}
-								} else {
-									// show if its a DNP - reason column
-									if (strlen($boxscore[$i][$j]) > 7) {
-										echo "<td colspan=13>" . $boxscore[$i][$j] . "</td>";
+										echo "<td>" . $boxscore[$i][$bi] . "</td>";
 									}
 								}
 							}
@@ -160,16 +179,17 @@ function printHTMLTable($name, $short, $boxscore)
 
 function getRedditText($awayShort, $awayName, $awayScore, $awayBox, $homeShort, $homeName, $homeScore, $homeBox)
 {
+	global $statIndex;
 	$text = "
 **[](/" . $awayShort . ") " . $awayShort . "**|";
 
-	$numCols = count($awayBox[0]);
+	$numCols = count($statIndex);
 	for ($i = 0; $i < $numCols; $i++) {
-		if ($i >= 2) {
-			$text .= "**" . $awayBox[0][$i] . "**|";
+		if ($i >= 1) {
+			$bi = $statIndex[$i];
+			$text .= "**" . $awayBox[0][$bi] . "**|";
 		}
 	}
-
 
 	$text .= "
 |:---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -179,10 +199,11 @@ function getRedditText($awayShort, $awayName, $awayScore, $awayBox, $homeShort, 
 
 	$text .= "
 **[](/" . $homeShort . ") " . $homeShort . "**|";
-	$numCols = count($homeBox[0]);
+	$numCols = count($statIndex);
 	for ($i = 0; $i < $numCols; $i++) {
-		if ($i >= 2) {
-			$text .= "**" . $homeBox[0][$i] . "**|";
+		if ($i >= 1) {
+			$bi = $statIndex[$i];
+			$text .= "**" . $homeBox[0][$bi] . "**|";
 		}
 	}
 
@@ -202,23 +223,22 @@ function getRedditText($awayShort, $awayName, $awayScore, $awayBox, $homeShort, 
 
 function getTableText($box)
 {
+	global $statIndex;
 	$text = "";
 	$lenI = count($box);
-	$numCols = count($box[0]);
+	$numCols = count($statIndex);
 	for ($i = 1; $i < $lenI; $i++) {
 		$lenJ = count($box[$i]);
-		for ($j = 0; $j < $lenJ; $j++) {
-			if ($j != 1) {
-				$text .= $box[$i][$j] . "|";
-			} else {
-				if (strlen($box[$i][$j]) > 7) {
-					//$text .= $box[$i][$j]."|";
-				}
-			}
-		}
-		if ($lenJ < $numCols) {
-			for ($j = 0; $j < $numCols - $lenJ; $j++) {
+		if ($lenJ == 2) {
+			// DNP
+			$text .= $box[$i][0] . "|";
+			for ($j = 0; $j < $numCols - 1; $j++) {
 				$text .= "|";
+			}
+		} else {
+			for ($j = 0; $j < $numCols; $j++) {
+				$bi = $statIndex[$j];
+				$text .= $box[$i][$bi] . "|";
 			}
 		}
 		$text .= "\n";
