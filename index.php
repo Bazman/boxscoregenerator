@@ -208,7 +208,7 @@ function getRedditText($awayShort, $awayName, $awayScore, $awayBox, $homeShort, 
 	$text .= "
 ||
 |:-:|
-|^[nbaboxscoregenerator.com](http://www.nbaboxscoregenerator.com) ^by ^/u/Obi-Wan_Ginobili|";
+|^[boxscoregenerator.sportsdeck.com](https://boxscoregenerator.sportsdeck.com/) ^by ^/u/bazman1976 (original work by /u/Obi-Wan_Ginobili)|";
 
 	return $text;
 }
@@ -456,9 +456,9 @@ function getShortName($teamName)
 
 			</div>
 			<div class="col-md-6 col-md-offset-1">
-				<p>Made for <a href="http://reddit.com/r/nba">/r/NBA</a> by <a href="http://reddit.com/user/Obi-Wan_Ginobili">/u/Obi-Wan_Ginobili.</a>
+				<p>Made for <a href="http://reddit.com/r/nba">/r/NBA</a> by <a href="https://www.reddit.com/user/bazman1976/">/u/bazman1976</a>(originally by <a href="http://reddit.com/user/Obi-Wan_Ginobili">/u/Obi-Wan_Ginobili).</a>
 					<br>
-					Report any issues on <a href="https://github.com/jorgegil96/boxscoregenerator">Github <i class="mdi mdi-github-circle"></i></a> or send me a <a href="http://reddit.com/user/Obi-Wan_Ginobili">PM</a>.
+					Report any issues on <a href="https://github.com/Bazman/boxscoregenerator">Github <i class="mdi mdi-github-circle"></i></a> or send me a <a href="https://www.reddit.com/user/bazman1976/">PM</a>.
 			</div>
 		</div> <!-- End row -->
 
@@ -491,7 +491,7 @@ function getShortName($teamName)
 
 					<a href="https://play.google.com/store/apps/details?id=com.gmail.jorgegilcavazos.ballislife">
 						<h4 style="text-align: center">Download Swish! An android app I made for /r/NBA</h4>
-						<img style="display: block; margin: auto;" width="200" src="play_button.png">
+						<a href='https://play.google.com/store/apps/details?id=com.gmail.jorgegilcavazos.ballislife&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' /></a>
 					</a>
 				</div>
 			</div>
